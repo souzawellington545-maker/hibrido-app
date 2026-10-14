@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Veloxx - Monitor de Rede</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0f172a">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0b0f19; color: #f8fafc; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        .container { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 16px; }
+        header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 10px; border-bottom: 1px solid #1e293b; }
+        h1 { font-size: 22px; color: #00f2fe; font-weight: 700; letter-spacing: 0.5px; }
+        .status-badge { font-size: 11px; padding: 4px 10px; border-radius: 20px; font-weight: 600; text-transform: uppercase; }
+        .status-good { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+        .status-bad { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+        .card { background: #131b2e; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; align-items: center; border: 1px solid #1e293b; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); transition: border-color 0.3s; }
+        .speed-value { font-size: 42px; font-weight: 800; margin: 5px 0; color: #ffffff; }
+        .speed-unit { font-size: 14px; color: #94a3b8; text-transform: uppercase; }
+        .metric-label { font-size: 13px; color: #94a3b8; font-weight: 500; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mini-card { background: #131b2e; border-radius: 12px; padding: 15px; border: 1px solid #1e293b; display: flex; flex-direction: column; justify-content: center; }
+        .mini-value { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-top: 4px; }
+        button { background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%); color: #0b0f19; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.2s; box-shadow: 0 4px 14px rgba(0, 242, 254, 0.3); }
+        button:active { opacity: 0.8; }
+        .log-box { background: #080c14; border-radius: 12px; padding: 12px; font-family: monospace; font-size: 11px; color: #64748b; height: 90px; overflow-y: auto; border: 1px solid #1e293b; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Veloxx</h1>
+            <div id="statusBadge" class="status-badge status-good">Aguardando...</div>
+        </header>
+        <div class="card" id="mainCard">
+            <span class="metric-label">VELOCIDADE DE DOWNLOAD</span>
+            <div class="speed-value" id="downloadSpeed">--</div>
+            <span class="speed-unit">Mbps</span>
+        </div>
+        <div class="grid">
+            <div class="mini-card">
+                <span class="metric-label">LATÊNCIA (PING)</span>
+                <div class="mini-value" id="pingValue">-- ms</div>
+            </div>
+            <div class="mini-card">
+                <span class="metric-label">ESTABILIDADE</span>
+                <div class="mini-value" id="stabilityValue">Estável</div>
+            </div>
+        </div>
+        <div class="grid">
+            <div class="mini-card">
+                <span class="metric-label">TIPO DE REDE</span>
+                <div class="mini-value" id="netType">Wi-Fi</div>
+            </div>
+            <div class="mini-card">
+                <span class="metric-label">STATUS DE QUEDAS</span>
+                <div class="mini-value" id="packetLoss">Nenhuma</div>
+            </div>
+        </div>
+        <button onclick="runDiagnostics()">TESTAR CONEXÃO AGORA</button>
+        <div class="log-box" id="logBox">
+            > Veloxx inicializado.<br>
+            > Pronto para monitorizar oscilações e velocidade.
+        </div>
+    </div>
+    <script>
+        function log(msg) {
+            const box = document.getElementById('logBox');
+            box.innerHTML += `<br>> ${msg}`;
+            box.scrollTop = box.scrollHeight;
+        }
+        function updateNetworkInfo() {
+            const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+            if (connection) {
+                document.getElementById('netType').innerText = connection.effectiveType ? `${connection.type || 'Wi-Fi'} (${connection.effectiveType.toUpperCase()})` : 'Wi-Fi';
+            }
+        }
+        async function runDiagnostics() {
+            const badge = document.getElementById('statusBadge');
+            const mainCard = document.getElementById('mainCard');
+            const dlElem = document.getElementById('downloadSpeed');
+            const pingElem = document.getElementById('pingValue');
+            const stabilityElem = document.getElementById('stabilityValue');
+            const lossElem = document.getElementById('packetLoss');
+            dlElem.innerText = "...";
+            pingElem.innerText = "...";
+            log("A iniciar teste de diagnóstico de rede...");
+            const startTime = performance.now();
+            try {
+                await fetch('https://www.google.com/favicon.ico?t=' + Date.now(), { mode: 'no-cors', cache: 'no-store' });
+                const endTime = performance.now();
+                const ping = Math.round(endTime - startTime);
+                pingElem.innerText = ping + " ms";
+                if (ping > 150) {
+                    stabilityElem.innerText = "Oscilando";
+                    badge.className = "status-badge status-bad";
+                    badge.innerText = "Instável";
+                    mainCard.style.borderColor = "#ef4444";
+                    lossElem.innerText = "Alta latência";
+                    log(`⚠️ Alerta: Rede instável detetada! Ping alto: ${ping}ms`);
+                } else {
+                    stabilityElem.innerText = "Excelente";
+                    badge.className = "status-badge status-good";
+                    badge.innerText = "Estável";
+                    mainCard.style.borderColor = "#10b981";
+                    lossElem.innerText = "Nenhuma";
+                    log(`✅ Rede estável. Latência: ${ping}ms`);
+                }
+            } catch (e) {
+                pingElem.innerText = "Erro";
+                stabilityElem.innerText = "Queda";
+                badge.className = "status-badge status-bad";
+                badge.innerText = "Sem Conexão";
+                mainCard.style.borderColor = "#ef4444";
+                lossElem.innerText = "Possível queda";
+                log("❌ Erro de conexão: Falha ao contactar a rede.");
+                return;
+            }
+            log("A medir velocidade de download...");
+            const downloadStart = performance.now();
+            try {
+                const response = await fetch('https://httpbin.org/bytes/500000?t=' + Date.now(), { cache: 'no-store' });
+                const blob = await response.blob();
+                const downloadEnd = performance.now();
+                const durationSeconds = (downloadEnd - downloadStart) / 1000;
+                const bitsLoaded = blob.size * 8;
+                const speedBps = bitsLoaded / durationSeconds;
+                const speedMbps = (speedBps / (1024 * 1024)).toFixed(2);
+                dlElem.innerText = speedMbps;
+                log(`📊 Download medido: ${speedMbps} Mbps`);
+                if (parseFloat(speedMbps) < 5.0) {
+                    stabilityElem.innerText = "Lenta / Oscilando";
+                    badge.className = "status-badge status-bad";
+                    badge.innerText = "Alerta Veloxx";
+                    mainCard.style.borderColor = "#ef4444";
+                    log("⚠️ Alerta: Velocidade abaixo do ideal detetada.");
+                }
+            } catch (err) {
+                dlElem.innerText = "0.00";
+                log("⚠️ Aviso: Não foi possível concluir o teste de banda larga.");
+            }
+            updateNetworkInfo();
+        }
+        window.onload = () => {
+            updateNetworkInfo();
+            runDiagnostics();
+        };
+    </script>
+</body>
+</html>
