@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veloxx</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,5 +22,10 @@
 <body>
     <h1>Bem-vindo ao Veloxx</h1>
     <p>O seu aplicativo híbrido está a funcionar em modo standalone!</p>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
 </body>
 </html>
