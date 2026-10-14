@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Veloxx</title>
-    <link rel="manifest" href="/hibrido-app/manifest.json">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#121212">
     <style>
         body {
@@ -20,7 +20,12 @@
     </style>
 </head>
 <body>
-    <h1>Bem-vindo ao Veloxx</h1>
-    <p>O seu aplicativo está pronto!</p>
+    <h1>Veloxx</h1>
+    <p>O seu aplicativo Veloxx está pronto para uso!</p>
+    <script>
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js');
+      }
+    </script>
 </body>
 </html>

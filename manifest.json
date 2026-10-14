@@ -1,7 +1,7 @@
 {
   "name": "Veloxx",
   "short_name": "Veloxx",
-  "description": "Aplicativo Veloxx Híbrido",
+  "description": "Aplicativo Veloxx",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#121212",
