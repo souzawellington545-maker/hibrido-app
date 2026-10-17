@@ -1,31 +1,23 @@
-<!DOCTYPE html>
-<html lang="pt">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Veloxx</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#121212">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #ffffff;
-            text-align: center;
-            padding: 50px;
-            margin: 0;
-        }
-        h1 { color: #00ffcc; }
-        p { font-size: 18px; }
-    </style>
-</head>
-<body>
-    <h1>Veloxx</h1>
-    <p>O seu aplicativo Veloxx está pronto para uso!</p>
-    <script>
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js');
-      }
-    </script>
-</body>
-</html>
+{
+  "name": "Veloxx",
+  "short_name": "Veloxx",
+  "description": "Aplicativo Veloxx",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2583/2583346.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2583/2583346.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
